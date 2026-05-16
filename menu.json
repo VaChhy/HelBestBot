@@ -1,0 +1,42 @@
+{
+  "categories": {
+    "🐔Chicken": [
+      {
+        "name": "ជ្រក់ជើងមាន់គ្មានឆ្អឹង",
+        "price": 2.99,
+        "description": "មីនុយប្រចាំហាង",
+        "image": "https://ik.imagekit.io/chhee/Helbest/Chicken-no-bone.jpg"
+      },
+      {
+        "name": "ជ្រក់សសៃកែងមាន់",
+        "price": 2.99,
+        "description": "មីនុយប្រចាំហាង",
+        "image": "https://ik.imagekit.io/chhee/Helbest/Chicken-Keng.jpg"
+      }
+    ],
+    "🦆 Duck": [
+      {
+        "name": "ជ្រក់ជើងទាគ្មានឆ្អឹង",
+        "price": 2.99,
+        "description": "មីនុយប្រចាំហាង",
+        "image": "https://ik.imagekit.io/chhee/Helbest/Duck-no-bone.jpg"
+      }
+    ],
+    "🐮 Beef": [
+      {
+        "name": "ជ្រក់ពោះគោ100ស្រទាប់",
+        "price": 4.99,
+        "description": "មីនុយថ្មី",
+        "image": "https://ik.imagekit.io/chhee/Helbest/Beef-100-slice.jpg"
+      }
+    ],
+    "🐷 Pork": [
+      {
+        "name": "ជ្រក់ត្រចៀកជ្រូក",
+        "price": 4.99,
+        "description": "មីនុយថ្មី",
+        "image": "https://ik.imagekit.io/chhee/Helbest/Pork-bone.jpg"
+      }
+    ]
+  }
+}
