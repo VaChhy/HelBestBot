@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HelBest | ហឹរប៊ែស</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #252525;
+    --border: rgba(255,255,255,0.08);
+    --accent: #D4A853;
+    --accent2: #e8c27a;
+    --text: #f0ebe0;
+    --muted: #888;
+    --green: #4caf76;
+    --radius: 14px;
+  }
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #1a1208 0%, #2a1f0a 100%);
+    border-bottom: 1px solid var(--accent);
+    padding: 14px 16px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-icon { font-size: 26px; }
+  .brand-text h1 { font-size: 14px; font-weight: 800; color: var(--accent); letter-spacing: 1px; }
+  .brand-text p { font-size: 10px; color: var(--muted); }
+  .lang-btn {
+    background: var(--surface2); border: 1px solid rgba(212,168,83,0.3);
+    border-radius: 20px; padding: 5px 12px;
+    color: var(--accent); font-size: 12px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .lang-btn:active { background: var(--accent); color: #000; }
+
+  /* ── USER BAR ── */
+  .user-bar {
+    background: rgba(212,168,83,0.07);
+    border: 1px solid rgba(212,168,83,0.18);
+    border-radius: 10px; padding: 8px 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .user-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 800; color: #000;
+    flex-shrink: 0;
+  }
+  .user-info { flex: 1; }
+  .user-info .uname { font-size: 13px; font-weight: 700; color: var(--text); }
+  .user-info .uphone { font-size: 11px; color: var(--muted); }
+  .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-right: 4px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── SECTION TITLE ── */
+  .section-title {
+    padding: 16px 16px 8px;
+    font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 2px; color: var(--accent);
+  }
+
+  /* ── MENU CARDS ── */
+  .menu-list { padding: 0 12px; display: flex; flex-direction: column; gap: 10px; padding-bottom: 10px; }
+  .menu-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+    display: flex; transition: border-color 0.2s;
+    -webkit-user-select: none; user-select: none;
+  }
+  .menu-card.in-cart { border-color: rgba(212,168,83,0.5); }
+
+  .food-thumb {
+    width: 100px; min-width: 100px; height: 95px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 46px; flex-shrink: 0; position: relative;
+    overflow: hidden;
+  }
+  .food-thumb img {
+    width: 100%; height: 100%; object-fit: cover;
+    position: absolute; inset: 0;
+  }
+  .food-thumb .emoji-fallback { position: relative; z-index: 1; }
+
+  .card-body { padding: 10px 12px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+  .food-name { font-size: 13px; font-weight: 700; line-height: 1.3; }
+  .food-name-alt { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+  .food-tag {
+    font-size: 10px; background: rgba(212,168,83,0.1);
+    color: var(--accent); padding: 2px 8px; border-radius: 20px;
+    display: inline-block; margin-top: 5px;
+  }
+  .food-price { font-size: 15px; font-weight: 800; color: var(--accent); margin-top: 6px; }
+
+  .card-actions { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .qty-wrap { display: flex; align-items: center; gap: 6px; }
+  .qty-btn {
+    width: 27px; height: 27px; border-radius: 50%;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-size: 15px; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .qty-btn:active { background: var(--accent); color: #000; border-color: var(--accent); }
+  .qty-num { min-width: 18px; text-align: center; font-weight: 700; font-size: 13px; }
+  .add-btn {
+    margin-left: auto;
+    background: var(--accent); color: #000;
+    border: none; padding: 6px 14px;
+    border-radius: 20px; font-size: 12px; font-weight: 800;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .add-btn:active { transform: scale(0.95); }
+  .add-btn.added { background: var(--green); color: #fff; }
+
+  /* ── CART BUTTON ── */
+  .cart-fab {
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: #000;
+    border-radius: 30px; padding: 13px 24px;
+    font-weight: 800; font-size: 14px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: 0 6px 28px rgba(212,168,83,0.45);
+    cursor: pointer; z-index: 200;
+    min-width: 230px; justify-content: space-between;
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  .cart-fab.hidden { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(16px); }
+
+  /* ── ORDER PANEL ── */
+  .order-panel {
+    position: fixed; inset: 0; z-index: 300;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    max-width: 430px; margin: 0 auto;
+  }
+  .order-panel.open { transform: translateY(0); }
+  .panel-hdr {
+    background: linear-gradient(135deg, #1a1208, #2a1f0a);
+    border-bottom: 1px solid var(--accent);
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    flex-shrink: 0;
+  }
+  .back-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-size: 16px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .panel-title { font-size: 16px; font-weight: 800; }
+
+  .order-scroll { flex: 1; overflow-y: auto; }
+  .order-items { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+
+  .order-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .oi-emoji { font-size: 26px; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; background: var(--surface2); border-radius: 10px; flex-shrink: 0; }
+  .oi-info { flex: 1; }
+  .oi-name { font-size: 13px; font-weight: 700; }
+  .oi-price { font-size: 11px; color: var(--accent); margin-top: 2px; }
+  .oi-controls { display: flex; align-items: center; gap: 6px; }
+  .oi-controls .qty-btn { width: 26px; height: 26px; font-size: 14px; }
+  .oi-controls .qty-num { font-size: 13px; }
+
+  /* ── CUSTOMER FORM ── */
+  .customer-form { padding: 0 12px 12px; }
+  .auto-note {
+    background: rgba(76,175,118,0.08);
+    border: 1px solid rgba(76,175,118,0.2);
+    border-radius: 10px; padding: 10px 12px; margin-bottom: 12px;
+    font-size: 11px; color: var(--green); line-height: 1.5;
+  }
+  .flabel { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; }
+  .auto-badge { font-size: 10px; color: var(--green); font-weight: 600; text-transform: none; letter-spacing: 0; }
+  .finput {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 11px 14px;
+    color: var(--text); font-size: 14px; width: 100%;
+    margin-bottom: 10px; transition: border-color 0.2s; font-family: inherit;
+  }
+  .finput:focus { outline: none; border-color: var(--accent); }
+  .finput.auto-filled { border-color: rgba(76,175,118,0.4); }
+
+  /* ── SUMMARY ── */
+  .order-summary {
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 14px; flex-shrink: 0;
+  }
+  .sumrow { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+  .sumrow.total { font-size: 16px; font-weight: 800; color: var(--text); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 4px; }
+  .sumrow.total span:last-child { color: var(--accent); }
+  .confirm-btn {
+    width: 100%; background: var(--accent); color: #000;
+    border: none; padding: 15px; border-radius: 12px;
+    font-size: 15px; font-weight: 800; cursor: pointer;
+    margin-top: 12px; letter-spacing: 0.5px; transition: opacity 0.15s;
+  }
+  .confirm-btn:active { opacity: 0.85; transform: scale(0.99); }
+
+  /* ── SUCCESS ── */
+  .success-screen {
+    position: fixed; inset: 0; z-index: 400;
+    background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 32px; text-align: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.35s;
+  }
+  .success-screen.show { opacity: 1; pointer-events: all; }
+  .success-icon { font-size: 70px; margin-bottom: 20px; }
+  .success-title { font-size: 22px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+  .success-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .order-chip { font-size: 11px; background: var(--surface2); border-radius: 20px; padding: 6px 18px; color: var(--accent); display: inline-block; margin-top: 14px; letter-spacing: 1px; }
+  .new-btn { margin-top: 28px; background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 12px 28px; border-radius: 30px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .new-btn:active { background: var(--accent); color: #000; }
+
+  .spacer { height: 80px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="brand">
+      <div class="brand-icon"></div>
+      <div class="brand-text">
+        <h1 id="brand-name">HelBest</h1>
+        <p id="brand-sub">Chinese-style spicy pickle</p>
+      </div>
+    </div>
+    <button class="lang-btn" id="lang-btn" onclick="toggleLang()">ខ្មែរ</button>
+  </div>
+  <div class="user-bar">
+    <div class="user-avatar" id="u-avatar">?</div>
+    <div class="user-info">
+      <div class="uname" id="u-name">Loading...</div>
+      <div class="uphone" id="u-phone">Fetching...</div>
+    </div>
+    <div><span class="status-dot"></span><span id="u-status" style="font-size:10px;color:var(--green)">Auto</span></div>
+  </div>
+</div>
+
+<!-- MENU LABEL -->
+<div class="section-title" id="menu-label">🍽 MENU</div>
+<div class="menu-list" id="menu-list"></div>
+<div class="spacer"></div>
+
+<!-- CART FAB -->
+<div class="cart-fab hidden" id="cart-fab" onclick="openPanel()">
+  <span>🛒 <span id="cart-count">0</span> <span id="cart-items-lbl">items</span></span>
+  <span id="cart-total">$0.00</span>
+  <span id="cart-btn-lbl">View Order →</span>
+</div>
+
+<!-- ORDER PANEL -->
+<div class="order-panel" id="order-panel">
+  <div class="panel-hdr">
+    <button class="back-btn" onclick="closePanel()">←</button>
+    <div class="panel-title" id="panel-title">Your Order</div>
+  </div>
+  <div class="order-scroll">
+    <div class="order-items" id="order-items"></div>
+    <div class="customer-form">
+      <div class="auto-note" id="auto-note">✓ Telegram info auto-fetched. Edit if needed.</div>
+      <div class="flabel" id="lbl-name">Name <span class="auto-badge">● Telegram</span></div>
+      <input class="finput auto-filled" id="inp-name" type="text" placeholder="Your name">
+      <div class="flabel" id="lbl-phone">Phone <span class="auto-badge" id="phone-badge">● Auto-fetched</span></div>
+      <input class="finput auto-filled" id="inp-phone" type="tel" placeholder="+855 xx xxx xxxx">
+      <div class="flabel" id="lbl-note">Note (Optional)</div>
+      <input class="finput" id="inp-note" type="text" placeholder="e.g. Less spicy...">
+    </div>
+  </div>
+  <div class="order-summary">
+    <div class="sumrow"><span id="lbl-sub">Subtotal</span><span id="sum-sub">$0.00</span></div>
+    <div class="sumrow"><span id="lbl-del">Delivery</span><span>Free 🎉</span></div>
+    <div class="sumrow total"><span id="lbl-tot">Total</span><span id="sum-tot">$0.00</span></div>
+    <button class="confirm-btn" id="confirm-btn" onclick="confirmOrder()">✓ Confirm Order</button>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-screen" id="success-screen">
+  <div class="success-icon">🎉</div>
+  <div class="success-title" id="suc-title">Order Placed!</div>
+  <p class="success-sub" id="suc-sub">Your pickled food is being prepared. We'll message you on Telegram!</p>
+  <div class="order-chip" id="order-chip">ORDER #000000</div>
+  <button class="new-btn" id="new-btn" onclick="resetAll()">+ New Order</button>
+</div>
+
+<script>
+const FOODS = [
+  { id:1, emoji:"🍗", en:"Pickled Boneless Chicken Feet",      kh:"ជ្រក់ជើងមាន់គ្មានឆ្អឹង",   tag_en:"Boneless · Tangy · Spicy",   tag_kh:"គ្មានឆ្អឹង · ជូ · ហឹរ",    price:3.50, bg:"#8B451322" },
+  { id:2, emoji:"🦆", en:"Pickled Boneless Duck Feet",         kh:"ជ្រក់ជើងទាគ្មានឆ្អឹង",    tag_en:"Boneless · Tangy · Spicy",      tag_kh:"គ្មានឆ្អឹង · ជូ · ហឹរ",        price:4.00, bg:"#556B2F22" },
+  { id:3, emoji:"🍖", en:"Pickled Chicken Thighs",             kh:"ជ្រក់សសៃកែងមាន់",         tag_en:"Tangy · Spicy",    tag_kh:"ជូ · ហឹរ",        price:4.50, bg:"#8B691422" },
+  { id:4, emoji:"🥩", en:"100-Layer Pickled Beef Belly",       kh:"ជ្រក់ពោះគោ១០០ស្រទាប់",   tag_en:"Tangy · Spicy",tag_kh:"ជូ · ហឹរ",price:6.00, bg:"#7B333322" },
+  { id:5, emoji:"🐷", en:"Pickled Pig Ears",                   kh:"ជ្រក់ត្រចៀកជ្រូក",        tag_en:"Tangy · Spicy",      tag_kh:"កជូ · ហឹរ",       price:4.00, bg:"#9B6B9B22" }
+];
+
+// Food image URLs — replace with your real CDN images
+// Format: food_images[food.id] = "https://your-cdn.com/image.jpg"
+const FOOD_IMAGES = {
+  1: "https://ik.imagekit.io/chhee/Helbest/Chicken-no-bone.jpg",
+  2: "https://ik.imagekit.io/chhee/Helbest/Duck-no-bone.jpg",
+  3: "https://ik.imagekit.io/chhee/Helbest/Chicken-Keng.jpg",
+  4: "https://ik.imagekit.io/chhee/Helbest/Beef-100-slice.jpg",
+  5: "https://ik.imagekit.io/chhee/Helbest/Pork-bone.jpg",
+};
+
+const T = {
+  en: {
+    brand:"HelBest", brand_sub:"Chinese-style spicy pickle",
+    menu:"🍽 MENU", items:"items", view:"View Order →",
+    panel_title:"Your Order",
+    auto_note:"✓ Telegram info auto-fetched. Edit if needed.",
+    lbl_name:"Name", lbl_phone:"Phone", phone_badge:"● Auto-fetched", lbl_note:"Note (Optional)",
+    sub:"Subtotal", del:"Delivery", tot:"Total",
+    confirm:"✓ Confirm Order",
+    suc_title:"Order Placed!",
+    suc_sub:"Your delicious pickled food is being prepared. We'll message you on Telegram!",
+    new_order:"+ New Order",
+    add:"Add", added:"Added ✓", status:"Auto"
+  },
+  kh: {
+    brand:"ហឹរប៊ែស", brand_sub:"ជ្រក់ជូរហឹរបែបចិន",
+    menu:"🍽 មុីនុយ", items:"មុីនុយ", view:"មើលការបញ្ជាទិញ →",
+    panel_title:"ការបញ្ជាទិញ",
+    auto_note:"✓ ព័ត៌មាន Telegram ត្រូវបានទាញយកស្វ័យប្រវត្តិ",
+    lbl_name:"ឈ្មោះ", lbl_phone:"លេខទូរស័ព្ទ", phone_badge:"● ស្វ័យប្រវត្តិ", lbl_note:"ចំណាំ (ស្រេចចិត្ត)",
+    sub:"តម្លៃបណ្តោះ", del:"ការដឹកជញ្ជូន", tot:"សរុប",
+    confirm:"✓ បញ្ជាក់ការបញ្ជាទិញ",
+    suc_title:"បញ្ជាទិញបានជោគជ័យ!",
+    suc_sub:"ម្ហូបជ្រក់ឆ្ងាញ់របស់អ្នកកំពុងត្រូវបានរៀបចំ។ យើងនឹងផ្ញើសារជូននៅ Telegram!",
+    new_order:"+ បញ្ជាទិញថ្មី",
+    add:"បន្ថែម", added:"✓ បន្ថែម", status:"ស្វ័យ"
+  }
+};
+
+let lang = "en";
+let cart = {};
+let userData = { name:"", phone:"", username:"", id:0 };
+
+const $ = id => document.getElementById(id);
+
+function toggleLang() {
+  lang = lang === "en" ? "kh" : "en";
+  $("lang-btn").textContent = lang === "en" ? "ខ្មែរ" : "EN";
+  applyLang(); renderMenu();
+  if ($("order-panel").classList.contains("open")) renderOrderItems();
+}
+
+function applyLang() {
+  const L = T[lang];
+  $("brand-name").textContent = L.brand;
+  $("brand-sub").textContent = L.brand_sub;
+  $("menu-label").textContent = L.menu;
+  $("cart-items-lbl").textContent = L.items;
+  $("cart-btn-lbl").textContent = L.view;
+  $("panel-title").textContent = L.panel_title;
+  $("auto-note").textContent = L.auto_note;
+  $("lbl-name").childNodes[0].textContent = L.lbl_name + " ";
+  $("lbl-phone").childNodes[0].textContent = L.lbl_phone + " ";
+  $("phone-badge").textContent = L.phone_badge;
+  $("lbl-note").textContent = L.lbl_note;
+  $("lbl-sub").textContent = L.sub;
+  $("lbl-del").textContent = L.del;
+  $("lbl-tot").textContent = L.tot;
+  $("confirm-btn").textContent = L.confirm;
+  $("suc-title").textContent = L.suc_title;
+  $("suc-sub").textContent = L.suc_sub;
+  $("new-btn").textContent = L.new_order;
+  $("u-status").textContent = L.status;
+}
+
+function renderMenu() {
+  const L = T[lang];
+  $("menu-list").innerHTML = FOODS.map(f => {
+    const qty = cart[f.id]?.qty || 0;
+    const inCart = qty > 0;
+    const imgUrl = FOOD_IMAGES[f.id];
+    const thumbContent = imgUrl
+      ? `<img src="${imgUrl}" alt="${f.en}" onerror="this.style.display='none'">`
+      : `<span class="emoji-fallback">${f.emoji}</span>`;
+    return `
+    <div class="menu-card ${inCart?'in-cart':''}" id="mc-${f.id}">
+      <div class="food-thumb" style="background:linear-gradient(135deg,${f.bg},#1a1a1a);">${thumbContent}</div>
+      <div class="card-body">
+        <div>
+          <div class="food-name">${lang==='en'?f.en:f.kh}</div>
+          <div class="food-name-alt">${lang==='en'?f.kh:f.en}</div>
+          <div class="food-tag">${lang==='en'?f.tag_en:f.tag_kh}</div>
+        </div>
+        <div>
+          <div class="food-price">$${f.price.toFixed(2)}</div>
+          <div class="card-actions">
+            ${inCart?`<div class="qty-wrap">
+              <button class="qty-btn" onclick="chQty(${f.id},-1)">−</button>
+              <span class="qty-num">${qty}</span>
+              <button class="qty-btn" onclick="chQty(${f.id},1)">+</button>
+            </div>`:''}
+            <button class="add-btn ${inCart?'added':''}" onclick="addToCart(${f.id})">
+              ${inCart?L.added:L.add}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addToCart(id) {
+  const f = FOODS.find(x=>x.id===id);
+  if (!cart[id]) cart[id] = {food:f, qty:1};
+  else cart[id].qty++;
+  updateFab(); renderMenu();
+}
+
+function chQty(id, d) {
+  if (!cart[id]) return;
+  cart[id].qty += d;
+  if (cart[id].qty <= 0) delete cart[id];
+  updateFab(); renderMenu();
+  if ($("order-panel").classList.contains("open")) renderOrderItems();
+}
+
+function updateFab() {
+  const count = Object.values(cart).reduce((s,v)=>s+v.qty, 0);
+  const tot = Object.values(cart).reduce((s,v)=>s+v.qty*v.food.price, 0);
+  $("cart-count").textContent = count;
+  $("cart-total").textContent = `$${tot.toFixed(2)}`;
+  const fab = $("cart-fab");
+  if (count > 0) fab.classList.remove("hidden");
+  else fab.classList.add("hidden");
+}
+
+function renderOrderItems() {
+  const items = Object.values(cart);
+  let sub = 0;
+  $("order-items").innerHTML = items.length === 0
+    ? `<p style="color:var(--muted);text-align:center;padding:24px;">${lang==='en'?'No items yet':'មិនទាន់មានម្ហូបទេ'}</p>`
+    : items.map(({food,qty}) => {
+        sub += food.price * qty;
+        return `<div class="order-item">
+          <div class="oi-emoji">${food.emoji}</div>
+          <div class="oi-info">
+            <div class="oi-name">${lang==='en'?food.en:food.kh}</div>
+            <div class="oi-price">${qty} × $${food.price.toFixed(2)} = $${(food.price*qty).toFixed(2)}</div>
+          </div>
+          <div class="oi-controls">
+            <button class="qty-btn" onclick="chQty(${food.id},-1)">−</button>
+            <span class="qty-num">${qty}</span>
+            <button class="qty-btn" onclick="chQty(${food.id},1)">+</button>
+          </div>
+        </div>`;
+      }).join('');
+  $("sum-sub").textContent = `$${sub.toFixed(2)}`;
+  $("sum-tot").textContent = `$${sub.toFixed(2)}`;
+}
+
+function openPanel() { renderOrderItems(); $("order-panel").classList.add("open"); }
+function closePanel() { $("order-panel").classList.remove("open"); }
+
+function confirmOrder() {
+  const name = $("inp-name").value.trim();
+  const phone = $("inp-phone").value.trim();
+  if (!name || !phone) {
+    alert(lang==='en'?'Please enter name and phone.':'សូមបញ្ចូលឈ្មោះ និងលេខទូរស័ព្ទ');
+    return;
+  }
+  const orderId = "ORD" + Math.floor(100000 + Math.random()*900000);
+  $("order-chip").textContent = "ORDER #" + orderId;
+
+  const payload = {
+    order_id: orderId,
+    user: name,
+    phone: phone,
+    username: userData.username,
+    telegram_id: userData.id,
+    note: $("inp-note").value,
+    lang: lang,
+    items: Object.values(cart).map(({food,qty}) => ({
+      id: food.id,
+      name_en: food.en,
+      name_kh: food.kh,
+      qty, price: food.price,
+      subtotal: (food.price*qty).toFixed(2)
+    })),
+    total: Object.values(cart).reduce((s,v)=>s+v.qty*v.food.price, 0).toFixed(2),
+    timestamp: new Date().toISOString()
+  };
+
+  try {
+    if (window.Telegram?.WebApp) {
+      window.Telegram.WebApp.sendData(JSON.stringify(payload));
+    }
+  } catch(e) { console.log("sendData:", e); }
+
+  closePanel();
+  $("success-screen").classList.add("show");
+}
+
+function resetAll() {
+  cart = {};
+  $("success-screen").classList.remove("show");
+  updateFab(); renderMenu();
+}
+
+// ── Telegram WebApp Init ─────────────────────────────────────────────────────
+function initTG() {
+  const tg = window.Telegram?.WebApp;
+  if (tg) {
+    tg.ready();
+    tg.expand();
+    tg.disableVerticalSwipes?.();
+
+    const user = tg.initDataUnsafe?.user;
+    if (user) {
+      const full = [user.first_name, user.last_name].filter(Boolean).join(" ");
+      const init = (user.first_name?.[0] || "?").toUpperCase();
+      userData = { name: full, username: user.username || "", id: user.id };
+
+      $("u-avatar").textContent = init;
+      $("u-name").textContent = full + (user.username ? ` (@${user.username})` : "");
+      $("u-phone").textContent = lang==="en" ? "Telegram verified ✓" : "Telegram បានផ្ទៀងផ្ទាត់ ✓";
+      $("inp-name").value = full;
+
+      // Request phone number via Telegram native contact sharing
+      tg.requestContact?.((ok, result) => {
+        if (ok && result?.contact?.phone_number) {
+          const phone = result.contact.phone_number;
+          userData.phone = phone;
+          $("inp-phone").value = phone;
+          $("u-phone").textContent = phone;
+        }
+      });
+      return;
+    }
+  }
+
+  // ── Demo fallback (when opened outside Telegram) ──
+  $("u-avatar").textContent = "D";
+  $("u-name").textContent = "Demo User (@demo)";
+  $("u-phone").textContent = "+855 12 345 678 (demo)";
+  $("inp-name").value = "Demo User";
+  $("inp-phone").value = "+855 12 345 678";
+}
+
+applyLang();
+renderMenu();
+initTG();
+</script>
+</body>
+</html>
